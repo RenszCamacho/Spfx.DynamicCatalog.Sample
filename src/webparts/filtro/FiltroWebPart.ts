@@ -1,20 +1,15 @@
 import * as React from 'react';
 import * as ReactDom from 'react-dom';
-import { ServiceScope } from '@microsoft/sp-core-library';
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 import { IDynamicDataCallables } from '@microsoft/sp-dynamic-data';
 import { Filtro, IFiltroProps } from './components/Filtro';
 import { IFilterCriteria } from '../../models/IFilterCriteria';
 import { getPropertyDefinitions, getPropertyValue } from '../../sources';
 import { DYNAMIC_PROPERTY_IDS } from '../../constants';
-import { CatalogService } from '../../services/CatalogService';
-
 export default class FiltroWebPart extends BaseClientSideWebPart<{}> implements IDynamicDataCallables {
   private _filterCriteria: IFilterCriteria = { categories: [], inStock: undefined };
 
   protected onInit(): Promise<void> {
-    const catalogService = new CatalogService(this.context.serviceScope);
-    this.context.serviceScope.provide(CatalogService.serviceKey, catalogService);
     if (this.context.dynamicDataSourceManager) {
       this.context.dynamicDataSourceManager.initializeSource(this);
     }
