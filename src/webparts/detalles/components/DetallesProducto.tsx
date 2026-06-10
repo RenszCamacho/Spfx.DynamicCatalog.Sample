@@ -2,11 +2,10 @@ import * as React from 'react';
 import { Stack, Text, Separator } from '@fluentui/react';
 import type { IProduct } from '../../../models/IProduct';
 import { Placeholder } from '../../../components/shared/Placeholder';
+import type { IDetallesProductoProps } from './IDetallesProductoProps';
 import styles from './Detalles.module.scss';
 
-export interface IDetallesProductoProps {
-  product: IProduct | undefined;
-}
+export { IDetallesProductoProps };
 
 export const DetallesProducto: React.FC<IDetallesProductoProps> = ({ product }) => {
   if (!product) {

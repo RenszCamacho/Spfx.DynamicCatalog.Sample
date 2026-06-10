@@ -16,11 +16,14 @@ export interface IUseProductosReturn {
 
 export function useProductos(
   serviceScope: ServiceScope,
+  listName: string,
   dynamicPropertyValue: DynamicProperty<IFilterCriteria> | undefined
 ): IUseProductosReturn {
   const catalogService = useMemo(() => {
-    return serviceScope.consume(CatalogService.serviceKey);
-  }, [serviceScope]);
+    const svc = serviceScope.consume(CatalogService.serviceKey);
+    svc.setListName(listName);
+    return svc;
+  }, [serviceScope, listName]);
 
   const [products, setProducts] = useState<IProduct[]>([]);
   const [loading, setLoading] = useState(true);
@@ -70,7 +73,7 @@ export function useProductos(
     };
     fetch();
     return () => { cancelled = true; };
-  }, [catalogService, filterCriteria]);
+  }, [catalogService, listName, filterCriteria]);
 
   // Auto-clear selection when filter changes and selected product not in results
   useEffect(() => {

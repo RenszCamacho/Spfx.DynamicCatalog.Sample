@@ -6,6 +6,7 @@ export interface ICatalogService {
   getProducts(filter?: IFilterCriteria): Promise<IProduct[]>;
   getCategories(): Promise<string[]>;
   readonly lastError: Error | undefined;
+  setListName(listName: string): void;
 }
 
 export const CatalogServiceKey: ServiceKey<ICatalogService> =
