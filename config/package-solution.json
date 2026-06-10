@@ -1,0 +1,40 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "spfx-dinamic-catalog-client-side-solution",
+    "id": "12fae43e-3058-4a4c-b42b-8723ed820fbe",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "",
+      "websiteUrl": "",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": "Undefined-1.23.0"
+    },
+    "metadata": {
+      "shortDescription": {
+        "default": "spfx-dinamic-catalog description"
+      },
+      "longDescription": {
+        "default": "spfx-dinamic-catalog description"
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "spfx-dinamic-catalog Feature",
+        "description": "The feature that activates elements of the spfx-dinamic-catalog solution.",
+        "id": "146c4213-ab03-4d07-b0dc-53089f93b3ef",
+        "version": "1.0.0.0"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "solution/spfx-dinamic-catalog.sppkg"
+  }
+}

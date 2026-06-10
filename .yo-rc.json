@@ -1,0 +1,19 @@
+{
+  "@microsoft/generator-sharepoint": {
+    "useGulp": false,
+    "plusBeta": false,
+    "isCreatingSolution": true,
+    "nodeVersion": "22.22.3",
+    "sdksVersions": {},
+    "version": "1.23.0",
+    "libraryName": "spfx-dinamic-catalog",
+    "libraryId": "12fae43e-3058-4a4c-b42b-8723ed820fbe",
+    "environment": "spo",
+    "packageManager": "npm",
+    "solutionName": "spfx-dinamic-catalog",
+    "solutionShortDescription": "spfx-dinamic-catalog description",
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "componentType": "webpart"
+  }
+}
