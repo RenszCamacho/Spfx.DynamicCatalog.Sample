@@ -52,7 +52,7 @@ export function useFiltro(serviceScope: ServiceScope): IUseFiltroReturn {
 
   const toggleCategory = useCallback((category: string) => {
     setSelectedCategories(prev =>
-      prev.indexOf(category) !== -1
+      prev.includes(category)
         ? prev.filter(c => c !== category)
         : [...prev, category]
     );

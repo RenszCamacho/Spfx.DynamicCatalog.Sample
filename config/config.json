@@ -2,17 +2,35 @@
   "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/config.2.0.schema.json",
   "version": "2.0",
   "bundles": {
-    "filters-web-part": {
+    "filtro-web-part": {
       "components": [
         {
-          "entrypoint": "./lib/webparts/filters/FiltersWebPart.js",
-          "manifest": "./src/webparts/filters/FiltersWebPart.manifest.json"
+          "entrypoint": "./lib/webparts/filtro/FiltroWebPart.js",
+          "manifest": "./src/webparts/filtro/FiltroWebPart.manifest.json"
+        }
+      ]
+    },
+    "productos-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/productos/ProductosWebPart.js",
+          "manifest": "./src/webparts/productos/ProductosWebPart.manifest.json"
+        }
+      ]
+    },
+    "detalles-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/detalles/DetallesWebPart.js",
+          "manifest": "./src/webparts/detalles/DetallesWebPart.manifest.json"
         }
       ]
     }
   },
   "externals": {},
   "localizedResources": {
-    "FiltersWebPartStrings": "lib/webparts/filters/loc/{locale}.js"
+    "FiltroWebPartStrings": "lib/webparts/filtro/loc/{locale}.js",
+    "ProductosWebPartStrings": "lib/webparts/productos/loc/{locale}.js",
+    "DetallesWebPartStrings": "lib/webparts/detalles/loc/{locale}.js"
   }
 }
