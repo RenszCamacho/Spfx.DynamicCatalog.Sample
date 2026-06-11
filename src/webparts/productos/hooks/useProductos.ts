@@ -39,7 +39,7 @@ export function useProductos(
     }
     const value = dynamicPropertyValue.tryGetValue();
     setFilterCriteria(value);
-    const onChange = () => {
+    const onChange = (): void => {
       const updated = dynamicPropertyValue.tryGetValue();
       setFilterCriteria(updated);
     };
@@ -52,7 +52,7 @@ export function useProductos(
   // Fetch products when filter changes
   useEffect(() => {
     let cancelled = false;
-    const fetch = async () => {
+    const fetch = async (): Promise<void> => {
       setLoading(true);
       setError(undefined);
       try {
@@ -71,6 +71,7 @@ export function useProductos(
         if (!cancelled) setLoading(false);
       }
     };
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     fetch();
     return () => { cancelled = true; };
   }, [catalogService, listName, filterCriteria]);

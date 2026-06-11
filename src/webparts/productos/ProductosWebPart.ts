@@ -32,7 +32,7 @@ export default class ProductosWebPart
     return super.onInit();
   }
 
-  public getPropertyDefinitions() {
+  public getPropertyDefinitions(): ReturnType<typeof getPropertyDefinitions> {
     return getPropertyDefinitions();
   }
 

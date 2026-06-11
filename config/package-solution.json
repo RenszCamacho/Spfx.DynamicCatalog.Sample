@@ -30,30 +30,7 @@
         "title": "spfx-dinamic-catalog Feature",
         "description": "The feature that activates elements of the spfx-dinamic-catalog solution.",
         "id": "146c4213-ab03-4d07-b0dc-53089f93b3ef",
-        "version": "1.0.0.0",
-        "components": [
-          {
-            "title": "Filtro",
-            "description": "Product category and stock filter webpart",
-            "id": "f5a7b3c1-2d4e-6f8a-9b0c-d1e2f3a4b5c6",
-            "version": "1.0.0.0",
-            "componentManifest": "./src/webparts/filtro/FiltroWebPart.manifest.json"
-          },
-          {
-            "title": "Productos",
-            "description": "Product list webpart with Dynamic Data interop",
-            "id": "a8b9c0d1-3e4f-5a6b-7c8d-9e0f1a2b3c4d",
-            "version": "1.0.0.0",
-            "componentManifest": "./src/webparts/productos/ProductosWebPart.manifest.json"
-          },
-          {
-            "title": "Detalles",
-            "description": "Product detail webpart consuming Dynamic Data",
-            "id": "b1c2d3e4-5f6a-7b8c-9d0e-1f2a3b4c5d6e",
-            "version": "1.0.0.0",
-            "componentManifest": "./src/webparts/detalles/DetallesWebPart.manifest.json"
-          }
-        ]
+        "version": "1.0.0.0"
       }
     ]
   },
