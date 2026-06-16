@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { ServiceScope } from '@microsoft/sp-core-library';
+import type { ServiceScope } from '@microsoft/sp-core-library';
 import { CatalogService } from '../../../services/CatalogService';
-import { IFilterCriteria } from '../../../models/IFilterCriteria';
+import type { IFilterCriteria } from '../../../models/IFilterCriteria';
 
 export interface IUseFiltroReturn {
   categories: string[];
@@ -14,10 +14,39 @@ export interface IUseFiltroReturn {
   toggleInStock: () => void;
 }
 
+const buildFilterCriteria = (
+  selectedCategories: string[],
+  inStock: boolean | undefined
+): IFilterCriteria => ({
+  categories: selectedCategories,
+  inStock,
+});
+
+const toggleItem = (items: string[], item: string): string[] =>
+  items.includes(item)
+    ? items.filter(c => c !== item)
+    : [...items, item];
+
+const cycleInStock = (current: boolean | undefined): boolean | undefined =>
+  current === undefined ? true : current ? false : undefined;
+
+const handleCategoryResult = (
+  result: { ok: boolean; data?: string[]; error?: Error },
+  setCategories: (cats: string[]) => void,
+  setError: (msg: string) => void
+): void => {
+  if (result.ok) {
+    setCategories(result.data!);
+  } else {
+    setError(result.error!.message);
+  }
+};
+
 export function useFiltro(serviceScope: ServiceScope): IUseFiltroReturn {
-  const catalogService = useMemo(() => {
-    return serviceScope.consume(CatalogService.serviceKey);
-  }, [serviceScope]);
+  const catalogService = useMemo(
+    () => serviceScope.consume(CatalogService.serviceKey),
+    [serviceScope]
+  );
 
   const [categories, setCategories] = useState<string[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -27,46 +56,34 @@ export function useFiltro(serviceScope: ServiceScope): IUseFiltroReturn {
 
   useEffect(() => {
     let cancelled = false;
+
     const fetchCategories = async (): Promise<void> => {
       setLoading(true);
       setError(undefined);
-      try {
-        const cats = await catalogService.getCategories();
-        if (!cancelled) {
-          setCategories(cats);
-        }
-        if (catalogService.lastError && !cancelled) {
-          setError(catalogService.lastError.message);
-        }
-      } catch (e) {
-        if (!cancelled) {
-          setError(e instanceof Error ? e.message : 'Error loading categories');
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
+      const result = await catalogService.getCategories();
+      if (cancelled) return;
+      handleCategoryResult(result, setCategories, setError);
+      setLoading(false);
     };
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    fetchCategories();
+
+    fetchCategories().catch(() => { /* handled inside */ });
     return () => { cancelled = true; };
   }, [catalogService]);
 
-  const toggleCategory = useCallback((category: string) => {
-    setSelectedCategories(prev =>
-      prev.includes(category)
-        ? prev.filter(c => c !== category)
-        : [...prev, category]
-    );
-  }, []);
+  const toggleCategory = useCallback(
+    (category: string) => setSelectedCategories(prev => toggleItem(prev, category)),
+    []
+  );
 
-  const toggleInStock = useCallback(() => {
-    setInStock(prev => prev === undefined ? true : prev ? false : undefined);
-  }, []);
+  const toggleInStock = useCallback(
+    () => setInStock(prev => cycleInStock(prev)),
+    []
+  );
 
-  const filterCriteria: IFilterCriteria = useMemo(() => ({
-    categories: selectedCategories,
-    inStock,
-  }), [selectedCategories, inStock]);
+  const filterCriteria = useMemo(
+    () => buildFilterCriteria(selectedCategories, inStock),
+    [selectedCategories, inStock]
+  );
 
   return {
     categories,

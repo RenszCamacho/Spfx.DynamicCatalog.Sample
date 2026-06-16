@@ -6,24 +6,30 @@ import "@pnp/sp/webs";
 import "@pnp/sp/lists";
 import "@pnp/sp/items";
 import "@pnp/sp/fields";
-import { ICatalogService } from './ICatalogService';
-import { IProduct, IProductResponse } from '../models/IProduct';
-import { IFilterCriteria } from '../models/IFilterCriteria';
+import type { ICatalogService } from './ICatalogService';
+import type { IProduct, IProductResponse } from '../models/IProduct';
+import type { IFilterCriteria } from '../models/IFilterCriteria';
+import type { Result } from '../models/Result';
+import { ok, err } from '../utils';
+import { mapToProducts, buildFilters } from '../helpers';
+import { SELECT_FIELDS } from '../constants';
+
+
+const toError = (e: unknown): Error =>
+  e instanceof Error ? e : new Error(String(e));
 
 export class CatalogService implements ICatalogService {
   public static readonly serviceKey: ServiceKey<ICatalogService> =
     ServiceKey.create<ICatalogService>(
       'DinamicCatalog.CatalogService',
-      CatalogService as unknown as { new (serviceScope: ServiceScope): ICatalogService }
+      CatalogService
     );
 
   private _sp!: SPFI;
-  private _listName: string;
-  private _lastError: Error | undefined;
+  private readonly _listName: string;
 
   constructor(serviceScope: ServiceScope, listName: string = 'Productos') {
     this._listName = listName;
-    this._lastError = undefined;
     serviceScope.whenFinished(() => {
       const pageContext = serviceScope.consume(PageContext.serviceKey);
       this._sp = spfi()
@@ -32,65 +38,26 @@ export class CatalogService implements ICatalogService {
     });
   }
 
-  public get lastError(): Error | undefined {
-    return this._lastError;
-  }
-
-  public setListName(listName: string): void {
-    this._listName = listName;
-  }
-
-  public async getProducts(filter?: IFilterCriteria): Promise<IProduct[]> {
+  public async getProducts(filter?: IFilterCriteria): Promise<Result<IProduct[]>> {
     try {
-      let query = this._sp.web.lists.getByTitle(this._listName).items;
-
-      const filterParts: string[] = [];
-      if (filter?.categories && filter.categories.length > 0) {
-        const catFilters = filter.categories.map(c => `categoria eq '${c}'`);
-        filterParts.push(`(${catFilters.join(' or ')})`);
-      }
-      if (filter?.inStock !== undefined) {
-        filterParts.push(`inStock eq ${filter.inStock ? '1' : '0'}`);
-      }
-
-      if (filterParts.length > 0) {
-        query = query.filter(filterParts.join(' and '));
-      }
-
-      const items: IProductResponse[] = await query.select(
-        'Id,Title,nombre,categoria,precio,inStock,descripcion'
-      )();
-      this._lastError = undefined;
-      return items.map(this._mapToProduct);
-    } catch (error) {
-      console.error('CatalogService.getProducts error:', error);
-      this._lastError = error instanceof Error ? error : new Error(String(error));
-      return [];
+      const filters = buildFilters(filter);
+      const query = this._sp.web.lists.getByTitle(this._listName).items;
+      const filtered = filters ? query.filter(filters) : query;
+      const items: IProductResponse[] = await filtered.select(SELECT_FIELDS)();
+      return ok(mapToProducts(items));
+    } catch (e) {
+      return err(toError(e).message);
     }
   }
 
-  public async getCategories(): Promise<string[]> {
+  public async getCategories(): Promise<Result<string[]>> {
     try {
       const field = await this._sp.web.lists
         .getByTitle(this._listName)
         .fields.getByInternalNameOrTitle('categoria')();
-      this._lastError = undefined;
-      return (field as { Choices?: string[] }).Choices || [];
-    } catch (error) {
-      console.error('CatalogService.getCategories error:', error);
-      this._lastError = error instanceof Error ? error : new Error(String(error));
-      return [];
+      return ok((field as { Choices?: string[] }).Choices ?? []);
+    } catch (e) {
+      return err(toError(e).message);
     }
-  }
-
-  private _mapToProduct(item: IProductResponse): IProduct {
-    return {
-      id: item.Id,
-      nombre: item.nombre || item.Title || '',
-      categoria: item.categoria || '',
-      precio: item.precio || 0,
-      inStock: !!item.inStock,
-      descripcion: item.descripcion || '',
-    };
   }
 }

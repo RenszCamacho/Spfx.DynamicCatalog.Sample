@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useRef, useEffect, useCallback } from 'react';
+import { useMemo } from 'react';
 import {
   DetailsList, Selection, SelectionMode, IColumn,
   Stack, Text, Spinner,
@@ -7,7 +7,7 @@ import {
 import type { IProduct } from '../../../models/IProduct';
 import { EmptyState } from '../../../components/shared/EmptyState';
 import { ErrorMessage } from '../../../components/shared/ErrorMessage';
-import { IProductosListProps } from './IProductosListProps';
+import type { IProductosListProps } from './IProductosListProps';
 import { useProductos } from '../hooks/useProductos';
 import styles from './Productos.module.scss';
 
@@ -18,67 +18,62 @@ const columns: IColumn[] = [
   { key: 'inStock', name: 'Stock', fieldName: 'inStock', minWidth: 60 },
 ];
 
+const createSelectionHandler = (
+  onProductSelected: (product: IProduct | undefined) => void,
+  selectProduct: (product: IProduct | undefined) => void
+): ((product: IProduct | undefined) => void) =>
+  (product: IProduct | undefined): void => {
+    selectProduct(product);
+    onProductSelected(product);
+  };
+
+const buildSelection = (
+  onSelect: (product: IProduct | undefined) => void
+): Selection => {
+  const selection = new Selection({
+    onSelectionChanged: () => {
+      const selected = selection.getSelection() as IProduct[];
+      onSelect(selected.length > 0 ? selected[0] : undefined);
+    },
+  });
+  return selection;
+};
+
 export const ProductosList: React.FC<IProductosListProps> = ({
   serviceScope,
   listName,
   dynamicPropertyValue,
   onProductSelected,
 }) => {
-  const hook = useProductos(serviceScope, listName, dynamicPropertyValue);
-  const isFirstRender = useRef(true);
+  const { selectProduct, products, loading, error } = useProductos(serviceScope, listName, dynamicPropertyValue);
 
-  // Handle user selection — fire both hook state and webpart callback
-  const handleSelect = useCallback(
-    (product: IProduct | undefined) => {
-      hook.selectProduct(product);
-      onProductSelected(product);
-    },
-    [hook.selectProduct, onProductSelected]
+  const handleSelect = useMemo(
+    () => createSelectionHandler(onProductSelected, selectProduct),
+    [onProductSelected, selectProduct]
   );
 
-  // Sync auto-clear (from filter change) back to webpart
-  useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
-    }
-    onProductSelected(hook.selectedProduct);
-  }, [hook.selectedProduct, onProductSelected]);
+  const selection = useMemo(() => buildSelection(handleSelect), [handleSelect]);
 
-  // Keep handleSelect ref stable for Selection callback
-  const handleSelectRef = useRef(handleSelect);
-  handleSelectRef.current = handleSelect;
-
-  const selection = useRef<Selection>();
-  if (!selection.current) {
-    selection.current = new Selection({
-      onSelectionChanged: () => {
-        const selected = selection.current!.getSelection() as IProduct[];
-        handleSelectRef.current(selected.length > 0 ? selected[0] : undefined);
-      },
-    });
-  }
-
-  if (hook.loading) {
+  if (loading) {
     return <Spinner label="Cargando productos..." />;
   }
 
-  if (hook.error) {
-    return <ErrorMessage message={hook.error} />;
+  if (error) {
+    return <ErrorMessage message={error} />;
   }
 
   return (
     <Stack className={styles.productos} tokens={{ padding: 10 }}>
       <Text variant="mediumPlus" styles={{ root: { fontWeight: 600 } }}>
-        Productos ({hook.products.length})
+        Productos ({products.length})
       </Text>
-      {hook.products.length === 0 ? (
+      {products.length === 0 ? (
         <EmptyState />
       ) : (
         <DetailsList
-          items={hook.products}
+          items={products}
           columns={columns}
-          selection={selection.current}
+          selection={selection}
           selectionMode={SelectionMode.single}
           setKey="id"
         />

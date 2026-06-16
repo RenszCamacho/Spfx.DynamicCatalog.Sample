@@ -14,71 +14,77 @@ export interface IUseProductosReturn {
   filterCriteria: IFilterCriteria | undefined;
 }
 
+const isSelectedInProducts = (products: IProduct[], selected: IProduct | undefined): boolean =>
+  selected !== undefined && products.some(p => p.id === selected.id);
+
+const useDynamicPropertySubscription = (
+  dynamicPropertyValue: DynamicProperty<IFilterCriteria> | undefined,
+  onChange: (value: IFilterCriteria | undefined) => void
+): void => {
+  useEffect(() => {
+    if (!dynamicPropertyValue) {
+      onChange(undefined);
+      return;
+    }
+    onChange(dynamicPropertyValue.tryGetValue());
+    const handler = (): void => onChange(dynamicPropertyValue.tryGetValue());
+    dynamicPropertyValue.register(handler);
+    return () => { dynamicPropertyValue.unregister(handler); };
+  }, [dynamicPropertyValue, onChange]);
+};
+
+const handleProductsResult = (
+  result: { ok: boolean; data?: IProduct[]; error?: Error },
+  setProducts: (products: IProduct[]) => void,
+  setError: (msg: string) => void
+): void => {
+  if (result.ok) {
+    setProducts(result.data!);
+  } else {
+    setError(result.error!.message);
+  }
+};
+
 export function useProductos(
   serviceScope: ServiceScope,
   listName: string,
   dynamicPropertyValue: DynamicProperty<IFilterCriteria> | undefined
 ): IUseProductosReturn {
-  const catalogService = useMemo(() => {
-    const svc = serviceScope.consume(CatalogService.serviceKey);
-    svc.setListName(listName);
-    return svc;
-  }, [serviceScope, listName]);
+  const catalogService = useMemo(
+    () => serviceScope.consume(CatalogService.serviceKey),
+    [serviceScope]
+  );
 
   const [products, setProducts] = useState<IProduct[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string>();
+  const [error, setError] = useState<string | undefined>();
   const [selectedProduct, setSelectedProduct] = useState<IProduct | undefined>();
   const [filterCriteria, setFilterCriteria] = useState<IFilterCriteria | undefined>();
 
-  // Subscribe to DynamicProperty changes
-  useEffect(() => {
-    if (!dynamicPropertyValue) {
-      setFilterCriteria(undefined);
-      return;
-    }
-    const value = dynamicPropertyValue.tryGetValue();
+  const handleFilterChange = useCallback((value: IFilterCriteria | undefined) => {
     setFilterCriteria(value);
-    const onChange = (): void => {
-      const updated = dynamicPropertyValue.tryGetValue();
-      setFilterCriteria(updated);
-    };
-    dynamicPropertyValue.register(onChange);
-    return () => {
-      dynamicPropertyValue.unregister(onChange);
-    };
-  }, [dynamicPropertyValue]);
+  }, []);
 
-  // Fetch products when filter changes
+  useDynamicPropertySubscription(dynamicPropertyValue, handleFilterChange);
+
   useEffect(() => {
     let cancelled = false;
-    const fetch = async (): Promise<void> => {
+
+    const fetchProducts = async (): Promise<void> => {
       setLoading(true);
       setError(undefined);
-      try {
-        const data = await catalogService.getProducts(filterCriteria);
-        if (!cancelled) {
-          setProducts(data);
-          if (catalogService.lastError) {
-            setError(catalogService.lastError.message);
-          }
-        }
-      } catch (e) {
-        if (!cancelled) {
-          setError(e instanceof Error ? e.message : 'Error');
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
+      const result = await catalogService.getProducts(filterCriteria);
+      if (cancelled) return;
+      handleProductsResult(result, setProducts, setError);
+      setLoading(false);
     };
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    fetch();
-    return () => { cancelled = true; };
-  }, [catalogService, listName, filterCriteria]);
 
-  // Auto-clear selection when filter changes and selected product not in results
+    fetchProducts().catch(() => { /* handled inside */ });
+    return () => { cancelled = true; };
+  }, [catalogService, filterCriteria]);
+
   useEffect(() => {
-    if (selectedProduct && !products.some(p => p.id === selectedProduct.id)) {
+    if (!isSelectedInProducts(products, selectedProduct)) {
       setSelectedProduct(undefined);
     }
   }, [products, selectedProduct]);
