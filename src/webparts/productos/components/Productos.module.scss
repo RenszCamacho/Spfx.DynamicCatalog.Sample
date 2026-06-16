@@ -1,0 +1,6 @@
+@import 'pkg:@fluentui/react/dist/sass/References.scss';
+
+.productos {
+  color: "[theme:bodyText, default: #323130]";
+  color: var(--bodyText);
+}
