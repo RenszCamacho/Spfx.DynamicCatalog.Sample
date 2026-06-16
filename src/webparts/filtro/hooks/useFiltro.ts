@@ -16,7 +16,10 @@ export interface IUseFiltroReturn {
   toggleInStock: () => void;
 }
 
-export function useFiltro(serviceScope: ServiceScope): IUseFiltroReturn {
+export function useFiltro(
+  serviceScope: ServiceScope,
+  onFilterChanged?: (criteria: IFilterCriteria) => void
+): IUseFiltroReturn {
   const catalogService = useMemo(
     () => serviceScope.consume(CatalogService.serviceKey),
     [serviceScope]
@@ -58,6 +61,10 @@ export function useFiltro(serviceScope: ServiceScope): IUseFiltroReturn {
     () => buildFilterCriteria(selectedCategories, inStock),
     [selectedCategories, inStock]
   );
+
+  useEffect(() => {
+    onFilterChanged?.(filterCriteria);
+  }, [filterCriteria, onFilterChanged]);
 
   return {
     categories,
