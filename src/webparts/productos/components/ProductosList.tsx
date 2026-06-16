@@ -20,10 +20,11 @@ const columns: IColumn[] = [
 
 export const ProductosList: React.FC<IProductosListProps> = ({
   serviceScope,
+  listName,
   dynamicPropertyValue,
   onProductSelected,
 }) => {
-  const hook = useProductos(serviceScope, dynamicPropertyValue);
+  const hook = useProductos(serviceScope, listName, dynamicPropertyValue);
   const isFirstRender = useRef(true);
 
   // Handle user selection — fire both hook state and webpart callback

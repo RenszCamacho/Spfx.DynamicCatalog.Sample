@@ -5,6 +5,7 @@ import type { IProduct } from '../../../models/IProduct';
 
 export interface IProductosListProps {
   serviceScope: ServiceScope;
+  listName: string;
   dynamicPropertyValue: DynamicProperty<IFilterCriteria> | undefined;
   onProductSelected: (product: IProduct | undefined) => void;
 }

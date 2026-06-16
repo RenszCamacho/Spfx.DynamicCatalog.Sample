@@ -4,6 +4,7 @@ import { Stack, Toggle, Text, Spinner, MessageBar, MessageBarType } from '@fluen
 import { IFiltroProps } from './IFiltroProps';
 import { useFiltro } from '../hooks/useFiltro';
 import { ErrorMessage } from '../../../components/shared/ErrorMessage';
+import { UI_MESSAGES } from '../../../constants';
 import styles from './Filtro.module.scss';
 
 export { IFiltroProps } from './IFiltroProps';
@@ -28,13 +29,13 @@ export const Filtro: React.FC<IFiltroProps> = ({ serviceScope, onFilterChanged }
       <Stack tokens={{ childrenGap: 4 }}>
         <Text variant="small">Categoría</Text>
         {categories.length === 0 ? (
-          <MessageBar messageBarType={MessageBarType.warning}>{'No se encontraron categorías'}</MessageBar>
+          <MessageBar messageBarType={MessageBarType.warning}>{UI_MESSAGES.DISCONNECTED}</MessageBar>
         ) : (
           categories.map(cat => (
             <Toggle
               key={cat}
               label={cat}
-              checked={selectedCategories.indexOf(cat) !== -1}
+              checked={selectedCategories.includes(cat)}
               onChange={() => toggleCategory(cat)}
               inlineLabel
             />

@@ -27,7 +27,7 @@ export function useFiltro(serviceScope: ServiceScope): IUseFiltroReturn {
 
   useEffect(() => {
     let cancelled = false;
-    const fetchCategories = async () => {
+    const fetchCategories = async (): Promise<void> => {
       setLoading(true);
       setError(undefined);
       try {
@@ -46,13 +46,14 @@ export function useFiltro(serviceScope: ServiceScope): IUseFiltroReturn {
         if (!cancelled) setLoading(false);
       }
     };
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     fetchCategories();
     return () => { cancelled = true; };
   }, [catalogService]);
 
   const toggleCategory = useCallback((category: string) => {
     setSelectedCategories(prev =>
-      prev.indexOf(category) !== -1
+      prev.includes(category)
         ? prev.filter(c => c !== category)
         : [...prev, category]
     );

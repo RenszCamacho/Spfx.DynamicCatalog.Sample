@@ -16,7 +16,7 @@ export default class FiltroWebPart extends BaseClientSideWebPart<{}> implements 
     return Promise.resolve();
   }
 
-  public getPropertyDefinitions() {
+  public getPropertyDefinitions(): ReturnType<typeof getPropertyDefinitions> {
     return getPropertyDefinitions();
   }
 

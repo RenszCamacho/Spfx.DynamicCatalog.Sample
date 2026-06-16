@@ -36,6 +36,10 @@ export class CatalogService implements ICatalogService {
     return this._lastError;
   }
 
+  public setListName(listName: string): void {
+    this._listName = listName;
+  }
+
   public async getProducts(filter?: IFilterCriteria): Promise<IProduct[]> {
     try {
       let query = this._sp.web.lists.getByTitle(this._listName).items;
