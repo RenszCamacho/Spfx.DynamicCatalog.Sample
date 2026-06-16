@@ -1,9 +1,12 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import type { ServiceScope } from '@microsoft/sp-core-library';
 import type { DynamicProperty } from '@microsoft/sp-component-base';
 import { CatalogService } from '../../../services/CatalogService';
 import type { IProduct } from '../../../models/IProduct';
 import type { IFilterCriteria } from '../../../models/IFilterCriteria';
+import { useDynamicPropertySubscription } from '../../../hooks/useDynamicPropertySubscription';
+import { isSelectedInProducts } from '../../../helpers';
+import { useFetch } from '../../../hooks/useFetch';
 
 export interface IUseProductosReturn {
   products: IProduct[];
@@ -16,69 +19,27 @@ export interface IUseProductosReturn {
 
 export function useProductos(
   serviceScope: ServiceScope,
-  listName: string,
   dynamicPropertyValue: DynamicProperty<IFilterCriteria> | undefined
 ): IUseProductosReturn {
-  const catalogService = useMemo(() => {
-    const svc = serviceScope.consume(CatalogService.serviceKey);
-    svc.setListName(listName);
-    return svc;
-  }, [serviceScope, listName]);
+  const catalogService = useMemo(
+    () => serviceScope.consume(CatalogService.serviceKey),
+    [serviceScope]
+  );
 
-  const [products, setProducts] = useState<IProduct[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string>();
-  const [selectedProduct, setSelectedProduct] = useState<IProduct | undefined>();
   const [filterCriteria, setFilterCriteria] = useState<IFilterCriteria | undefined>();
+  const [selectedProduct, setSelectedProduct] = useState<IProduct | undefined>();
 
-  // Subscribe to DynamicProperty changes
-  useEffect(() => {
-    if (!dynamicPropertyValue) {
-      setFilterCriteria(undefined);
-      return;
-    }
-    const value = dynamicPropertyValue.tryGetValue();
-    setFilterCriteria(value);
-    const onChange = (): void => {
-      const updated = dynamicPropertyValue.tryGetValue();
-      setFilterCriteria(updated);
-    };
-    dynamicPropertyValue.register(onChange);
-    return () => {
-      dynamicPropertyValue.unregister(onChange);
-    };
-  }, [dynamicPropertyValue]);
+  useDynamicPropertySubscription(dynamicPropertyValue, setFilterCriteria);
 
-  // Fetch products when filter changes
-  useEffect(() => {
-    let cancelled = false;
-    const fetch = async (): Promise<void> => {
-      setLoading(true);
-      setError(undefined);
-      try {
-        const data = await catalogService.getProducts(filterCriteria);
-        if (!cancelled) {
-          setProducts(data);
-          if (catalogService.lastError) {
-            setError(catalogService.lastError.message);
-          }
-        }
-      } catch (e) {
-        if (!cancelled) {
-          setError(e instanceof Error ? e.message : 'Error');
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    fetch();
-    return () => { cancelled = true; };
-  }, [catalogService, listName, filterCriteria]);
+  const { data: products, loading, error } = useFetch(
+    () => catalogService.getProducts(filterCriteria),
+    [],
+    [catalogService, filterCriteria]
+  );
 
-  // Auto-clear selection when filter changes and selected product not in results
-  useEffect(() => {
-    if (selectedProduct && !products.some(p => p.id === selectedProduct.id)) {
+  // Auto-clear selection when product not in results
+  useMemo(() => {
+    if (!isSelectedInProducts(products, selectedProduct)) {
       setSelectedProduct(undefined);
     }
   }, [products, selectedProduct]);

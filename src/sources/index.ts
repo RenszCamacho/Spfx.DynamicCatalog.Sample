@@ -9,31 +9,28 @@ export interface ISourceState {
   filterCriteria: IFilterCriteria;
 }
 
-export function getPropertyDefinitions(): ReadonlyArray<IDynamicDataPropertyDefinition> {
-  return [
-    {
-      id: DYNAMIC_PROPERTY_IDS.FILTER_CRITERIA,
-      title: 'Filter Criteria',
-      description: 'Current filter criteria (categories and stock)',
-    },
-    {
-      id: DYNAMIC_PROPERTY_IDS.SELECTED_PRODUCT,
-      title: 'Selected Product',
-      description: 'Currently selected product from the list',
-    },
-  ];
-}
+const PROPERTY_RESOLVERS: Record<string, (state: Partial<ISourceState>) => unknown> = {
+  [DYNAMIC_PROPERTY_IDS.SELECTED_PRODUCT]: (state) => state.selectedProduct,
+  [DYNAMIC_PROPERTY_IDS.FILTER_CRITERIA]: (state) => state.filterCriteria,
+};
 
-export function getPropertyValue(
+export const getPropertyDefinitions = (): ReadonlyArray<IDynamicDataPropertyDefinition> => [
+  {
+    id: DYNAMIC_PROPERTY_IDS.FILTER_CRITERIA,
+    title: 'Filter Criteria',
+    description: 'Current filter criteria (categories and stock)',
+  },
+  {
+    id: DYNAMIC_PROPERTY_IDS.SELECTED_PRODUCT,
+    title: 'Selected Product',
+    description: 'Currently selected product from the list',
+  },
+];
+
+export const getPropertyValue = (
   propertyId: string,
   state: Partial<ISourceState>
-): unknown {
-  switch (propertyId) {
-    case DYNAMIC_PROPERTY_IDS.SELECTED_PRODUCT:
-      return state.selectedProduct;
-    case DYNAMIC_PROPERTY_IDS.FILTER_CRITERIA:
-      return state.filterCriteria;
-    default:
-      return undefined;
-  }
-}
+): unknown => {
+  const resolver = PROPERTY_RESOLVERS[propertyId];
+  return resolver?.(state) ?? undefined;
+};

@@ -7,8 +7,7 @@ import {
   type IPropertyPaneConfiguration,
 } from '@microsoft/sp-property-pane';
 import type { DynamicProperty } from '@microsoft/sp-component-base';
-import { DetallesProducto } from './components/DetallesProducto';
-import { useDetalles } from './hooks/useDetalles';
+import { DetallesWrapper } from './components/DetallesWrapper';
 import type { IProduct } from '../../models/IProduct';
 
 export interface IDetallesWebPartProps {
@@ -17,11 +16,10 @@ export interface IDetallesWebPartProps {
 
 export default class DetallesWebPart extends BaseClientSideWebPart<IDetallesWebPartProps> {
   public render(): void {
-    const DetallesWrapper: React.FC = () => {
-      const { product } = useDetalles(this.properties.selectedProduct);
-      return React.createElement(DetallesProducto, { product });
-    };
-    ReactDom.render(React.createElement(DetallesWrapper), this.domElement);
+    ReactDom.render(
+      React.createElement(DetallesWrapper, { product: this.properties.selectedProduct }),
+      this.domElement
+    );
   }
 
   protected onDispose(): void {
