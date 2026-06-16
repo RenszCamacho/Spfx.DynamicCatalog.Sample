@@ -45,11 +45,9 @@ export default class ProductosWebPart
   };
 
   public render(): void {
-    const listName = this.properties.listName ?? 'Productos';
     ReactDom.render(
       React.createElement(ProductosList, {
         serviceScope: this.context.serviceScope,
-        listName,
         dynamicPropertyValue: this.properties.filterCriteria,
         onProductSelected: this._onProductSelected,
       }),

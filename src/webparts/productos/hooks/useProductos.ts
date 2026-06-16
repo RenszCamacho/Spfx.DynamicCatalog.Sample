@@ -4,6 +4,9 @@ import type { DynamicProperty } from '@microsoft/sp-component-base';
 import { CatalogService } from '../../../services/CatalogService';
 import type { IProduct } from '../../../models/IProduct';
 import type { IFilterCriteria } from '../../../models/IFilterCriteria';
+import { useDynamicPropertySubscription } from '../../../hooks/useDynamicPropertySubscription';
+import { handleResult } from '../../../utils';
+import { isSelectedInProducts } from '../../../helpers';
 
 export interface IUseProductosReturn {
   products: IProduct[];
@@ -14,40 +17,8 @@ export interface IUseProductosReturn {
   filterCriteria: IFilterCriteria | undefined;
 }
 
-const isSelectedInProducts = (products: IProduct[], selected: IProduct | undefined): boolean =>
-  selected !== undefined && products.some(p => p.id === selected.id);
-
-const useDynamicPropertySubscription = (
-  dynamicPropertyValue: DynamicProperty<IFilterCriteria> | undefined,
-  onChange: (value: IFilterCriteria | undefined) => void
-): void => {
-  useEffect(() => {
-    if (!dynamicPropertyValue) {
-      onChange(undefined);
-      return;
-    }
-    onChange(dynamicPropertyValue.tryGetValue());
-    const handler = (): void => onChange(dynamicPropertyValue.tryGetValue());
-    dynamicPropertyValue.register(handler);
-    return () => { dynamicPropertyValue.unregister(handler); };
-  }, [dynamicPropertyValue, onChange]);
-};
-
-const handleProductsResult = (
-  result: { ok: boolean; data?: IProduct[]; error?: Error },
-  setProducts: (products: IProduct[]) => void,
-  setError: (msg: string) => void
-): void => {
-  if (result.ok) {
-    setProducts(result.data!);
-  } else {
-    setError(result.error!.message);
-  }
-};
-
 export function useProductos(
   serviceScope: ServiceScope,
-  listName: string,
   dynamicPropertyValue: DynamicProperty<IFilterCriteria> | undefined
 ): IUseProductosReturn {
   const catalogService = useMemo(
@@ -75,7 +46,7 @@ export function useProductos(
       setError(undefined);
       const result = await catalogService.getProducts(filterCriteria);
       if (cancelled) return;
-      handleProductsResult(result, setProducts, setError);
+      handleResult(result, setProducts, setError);
       setLoading(false);
     };
 

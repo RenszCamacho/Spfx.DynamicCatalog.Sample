@@ -41,11 +41,10 @@ const buildSelection = (
 
 export const ProductosList: React.FC<IProductosListProps> = ({
   serviceScope,
-  listName,
   dynamicPropertyValue,
   onProductSelected,
 }) => {
-  const { selectProduct, products, loading, error } = useProductos(serviceScope, listName, dynamicPropertyValue);
+  const { selectProduct, products, loading, error } = useProductos(serviceScope, dynamicPropertyValue);
 
   const handleSelect = useMemo(
     () => createSelectionHandler(onProductSelected, selectProduct),
