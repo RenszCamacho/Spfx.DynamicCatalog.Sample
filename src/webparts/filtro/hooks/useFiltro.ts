@@ -1,9 +1,10 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import type { ServiceScope } from '@microsoft/sp-core-library';
 import { CatalogService } from '../../../services/CatalogService';
 import type { IFilterCriteria } from '../../../models/IFilterCriteria';
-import { toggleItem, cycleInStock, handleResult } from '../../../utils';
+import { toggleItem, cycleInStock } from '../../../utils';
 import { buildFilterCriteria } from '../../../helpers';
+import { useFetch } from '../../../hooks/useFetch';
 
 export interface IUseFiltroReturn {
   categories: string[];
@@ -25,27 +26,14 @@ export function useFiltro(
     [serviceScope]
   );
 
-  const [categories, setCategories] = useState<string[]>([]);
+  const { data: categories, loading, error } = useFetch(
+    () => catalogService.getCategories(),
+    [],
+    [catalogService]
+  );
+
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [inStock, setInStock] = useState<boolean | undefined>(undefined);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | undefined>(undefined);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    const fetchCategories = async (): Promise<void> => {
-      setLoading(true);
-      setError(undefined);
-      const result = await catalogService.getCategories();
-      if (cancelled) return;
-      handleResult(result, setCategories, setError);
-      setLoading(false);
-    };
-
-    fetchCategories().catch(() => { /* handled inside */ });
-    return () => { cancelled = true; };
-  }, [catalogService]);
 
   const toggleCategory = useCallback(
     (category: string) => setSelectedCategories(prev => toggleItem(prev, category)),
@@ -62,7 +50,8 @@ export function useFiltro(
     [selectedCategories, inStock]
   );
 
-  useEffect(() => {
+  // Notify parent of filter changes
+  useMemo(() => {
     onFilterChanged?.(filterCriteria);
   }, [filterCriteria, onFilterChanged]);
 

@@ -1,12 +1,12 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import type { ServiceScope } from '@microsoft/sp-core-library';
 import type { DynamicProperty } from '@microsoft/sp-component-base';
 import { CatalogService } from '../../../services/CatalogService';
 import type { IProduct } from '../../../models/IProduct';
 import type { IFilterCriteria } from '../../../models/IFilterCriteria';
 import { useDynamicPropertySubscription } from '../../../hooks/useDynamicPropertySubscription';
-import { handleResult } from '../../../utils';
 import { isSelectedInProducts } from '../../../helpers';
+import { useFetch } from '../../../hooks/useFetch';
 
 export interface IUseProductosReturn {
   products: IProduct[];
@@ -26,35 +26,19 @@ export function useProductos(
     [serviceScope]
   );
 
-  const [products, setProducts] = useState<IProduct[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | undefined>();
-  const [selectedProduct, setSelectedProduct] = useState<IProduct | undefined>();
   const [filterCriteria, setFilterCriteria] = useState<IFilterCriteria | undefined>();
+  const [selectedProduct, setSelectedProduct] = useState<IProduct | undefined>();
 
-  const handleFilterChange = useCallback((value: IFilterCriteria | undefined) => {
-    setFilterCriteria(value);
-  }, []);
+  useDynamicPropertySubscription(dynamicPropertyValue, setFilterCriteria);
 
-  useDynamicPropertySubscription(dynamicPropertyValue, handleFilterChange);
+  const { data: products, loading, error } = useFetch(
+    () => catalogService.getProducts(filterCriteria),
+    [],
+    [catalogService, filterCriteria]
+  );
 
-  useEffect(() => {
-    let cancelled = false;
-
-    const fetchProducts = async (): Promise<void> => {
-      setLoading(true);
-      setError(undefined);
-      const result = await catalogService.getProducts(filterCriteria);
-      if (cancelled) return;
-      handleResult(result, setProducts, setError);
-      setLoading(false);
-    };
-
-    fetchProducts().catch(() => { /* handled inside */ });
-    return () => { cancelled = true; };
-  }, [catalogService, filterCriteria]);
-
-  useEffect(() => {
+  // Auto-clear selection when product not in results
+  useMemo(() => {
     if (!isSelectedInProducts(products, selectedProduct)) {
       setSelectedProduct(undefined);
     }

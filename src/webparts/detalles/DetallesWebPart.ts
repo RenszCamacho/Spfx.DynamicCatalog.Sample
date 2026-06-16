@@ -7,20 +7,12 @@ import {
   type IPropertyPaneConfiguration,
 } from '@microsoft/sp-property-pane';
 import type { DynamicProperty } from '@microsoft/sp-component-base';
-import { DetallesProducto } from './components/DetallesProducto';
-import { useDetalles } from './hooks/useDetalles';
+import { DetallesWrapper } from './components/DetallesWrapper';
 import type { IProduct } from '../../models/IProduct';
 
 export interface IDetallesWebPartProps {
   selectedProduct: DynamicProperty<IProduct>;
 }
-
-const DetallesWrapper: React.FC<{ product: DynamicProperty<IProduct> | undefined }> = ({
-  product: dynamicProduct,
-}) => {
-  const { product } = useDetalles(dynamicProduct);
-  return React.createElement(DetallesProducto, { product });
-};
 
 export default class DetallesWebPart extends BaseClientSideWebPart<IDetallesWebPartProps> {
   public render(): void {

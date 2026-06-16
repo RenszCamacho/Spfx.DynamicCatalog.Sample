@@ -10,13 +10,9 @@ import type { ICatalogService } from './ICatalogService';
 import type { IProduct, IProductResponse } from '../models/IProduct';
 import type { IFilterCriteria } from '../models/IFilterCriteria';
 import type { Result } from '../models/Result';
-import { ok, err } from '../utils';
+import { ok, err, toError } from '../utils';
 import { mapToProducts, buildFilters } from '../helpers';
 import { SELECT_FIELDS } from '../constants';
-
-
-const toError = (e: unknown): Error =>
-  e instanceof Error ? e : new Error(String(e));
 
 export class CatalogService implements ICatalogService {
   public static readonly serviceKey: ServiceKey<ICatalogService> =
