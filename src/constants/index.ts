@@ -21,3 +21,5 @@ export const UI_MESSAGES = {
 } as const;
 
 export const SELECT_FIELDS = 'Id,Title,nombre,categoria,precio,inStock,descripcion';
+
+export { PRODUCT_COLUMNS } from './columns';
