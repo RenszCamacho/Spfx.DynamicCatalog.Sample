@@ -19,3 +19,7 @@ export const UI_MESSAGES = {
   PERMISSION_ERROR: 'No tenés permisos para acceder a la lista',
   GENERIC_ERROR: 'Ocurrió un error al cargar los datos',
 } as const;
+
+export const SELECT_FIELDS = 'Id,Title,nombre,categoria,precio,inStock,descripcion';
+
+export { PRODUCT_COLUMNS } from './columns';
