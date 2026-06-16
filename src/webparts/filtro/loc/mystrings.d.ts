@@ -1,7 +1,6 @@
-declare interface IFiltersWebPartStrings {
+declare interface IFiltroWebPartStrings {
   PropertyPaneDescription: string;
   BasicGroupName: string;
-  DescriptionFieldLabel: string;
   AppLocalEnvironmentSharePoint: string;
   AppLocalEnvironmentTeams: string;
   AppLocalEnvironmentOffice: string;
@@ -13,7 +12,7 @@ declare interface IFiltersWebPartStrings {
   UnknownEnvironment: string;
 }
 
-declare module 'FiltersWebPartStrings' {
-  const strings: IFiltersWebPartStrings;
+declare module 'FiltroWebPartStrings' {
+  const strings: IFiltroWebPartStrings;
   export = strings;
 }

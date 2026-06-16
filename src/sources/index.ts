@@ -1,6 +1,7 @@
-import { IProduct } from '../models/IProduct';
-import { IFilterCriteria } from '../models/IFilterCriteria';
+import type { IProduct } from '../models/IProduct';
+import type { IFilterCriteria } from '../models/IFilterCriteria';
 import { DYNAMIC_PROPERTY_IDS } from '../constants';
+import type { IDynamicDataPropertyDefinition } from '@microsoft/sp-dynamic-data';
 
 export interface ISourceState {
   products: IProduct[];
@@ -8,7 +9,7 @@ export interface ISourceState {
   filterCriteria: IFilterCriteria;
 }
 
-export function getPropertyDefinitions() {
+export function getPropertyDefinitions(): ReadonlyArray<IDynamicDataPropertyDefinition> {
   return [
     {
       id: DYNAMIC_PROPERTY_IDS.FILTER_CRITERIA,
