@@ -14,7 +14,6 @@ import type { IFilterCriteria } from '../../models/IFilterCriteria';
 import { getPropertyDefinitions, getPropertyValue } from '../../sources';
 import { DYNAMIC_PROPERTY_IDS } from '../../constants';
 import { ProductosList } from './components/ProductosList';
-import type { IProductosListProps } from './components/IProductosListProps';
 
 export interface IProductosWebPartProps {
   listName: string;
@@ -32,13 +31,11 @@ export default class ProductosWebPart
     return super.onInit();
   }
 
-  public getPropertyDefinitions(): ReturnType<typeof getPropertyDefinitions> {
-    return getPropertyDefinitions();
-  }
+  public getPropertyDefinitions = (): ReturnType<typeof getPropertyDefinitions> =>
+    getPropertyDefinitions();
 
-  public getPropertyValue(propertyId: string): unknown {
-    return getPropertyValue(propertyId, { selectedProduct: this._selectedProduct });
-  }
+  public getPropertyValue = (propertyId: string): unknown =>
+    getPropertyValue(propertyId, { selectedProduct: this._selectedProduct });
 
   private _onProductSelected = (product: IProduct | undefined): void => {
     this._selectedProduct = product;
@@ -48,14 +45,14 @@ export default class ProductosWebPart
   };
 
   public render(): void {
-    const listName = this.properties.listName || 'Productos';
-    const element: React.ReactElement<IProductosListProps> = React.createElement(ProductosList, {
-      serviceScope: this.context.serviceScope,
-      listName,
-      dynamicPropertyValue: this.properties.filterCriteria,
-      onProductSelected: this._onProductSelected,
-    });
-    ReactDom.render(element, this.domElement);
+    ReactDom.render(
+      React.createElement(ProductosList, {
+        serviceScope: this.context.serviceScope,
+        dynamicPropertyValue: this.properties.filterCriteria,
+        onProductSelected: this._onProductSelected,
+      }),
+      this.domElement
+    );
   }
 
   protected onDispose(): void {
