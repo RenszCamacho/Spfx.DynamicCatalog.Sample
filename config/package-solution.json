@@ -3,7 +3,7 @@
   "solution": {
     "name": "spfx-dinamic-catalog-client-side-solution",
     "id": "12fae43e-3058-4a4c-b42b-8723ed820fbe",
-    "version": "1.0.0.1",
+    "version": "1.0.0.2",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true,
     "isDomainIsolated": false,
