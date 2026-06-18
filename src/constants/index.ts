@@ -1,5 +1,5 @@
 export const LIST_COLUMNS = {
-  NOMBRE: 'nombre',
+  NOMBRE: 'Title',
   CATEGORIA: 'categoria',
   PRECIO: 'precio',
   IN_STOCK: 'inStock',
@@ -20,6 +20,6 @@ export const UI_MESSAGES = {
   GENERIC_ERROR: 'Ocurrió un error al cargar los datos',
 } as const;
 
-export const SELECT_FIELDS = 'Id,Title,nombre,categoria,precio,inStock,descripcion';
+export const SELECT_FIELDS = 'Id,Title,categoria,precio,inStock,descripcion';
 
 export { PRODUCT_COLUMNS } from './columns';

@@ -2,7 +2,7 @@ import type { IProduct, IProductResponse } from '../models/IProduct';
 
 export const mapToProduct = (item: IProductResponse): IProduct => ({
   id: item.Id,
-  nombre: item.nombre ?? item.Title ?? '',
+  nombre: item.Title ?? '',
   categoria: item.categoria ?? '',
   precio: item.precio ?? 0,
   inStock: Boolean(item.inStock),
